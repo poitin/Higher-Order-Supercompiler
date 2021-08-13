@@ -1,5 +1,3 @@
-import Construct
-
 and x y = case x of 
              True -> y     
            | False -> False;  
