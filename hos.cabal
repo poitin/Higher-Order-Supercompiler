@@ -1,0 +1,62 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 95dbb0122905ba673b01a8cef4e9aba77a865c1e6ee05b7458b7f51449f9cac8
+
+name:           hos
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/githubuser/Higher-Order-Supercompiler#readme>
+homepage:       https://github.com/poitin/Higher-Order-Supercompiler#readme
+bug-reports:    https://github.com/poitin/Higher-Order-Supercompiler/issues
+author:         Geoff Hamilton
+maintainer:     hamilton@computing.dcu.ie
+copyright:      2021 Geoff Hamilton
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/poitin/Higher-Order-Supercompiler
+
+library
+  exposed-modules:
+      Exception
+      Term
+      Trans
+  other-modules:
+      Paths_hos
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.7 && <5
+    , parsec
+    , pretty
+    , directory
+    , process
+  default-language: Haskell2010
+
+executable hos
+  main-is: Main.hs
+  other-modules:
+      Exception
+      Term
+      Trans
+  hs-source-dirs:
+      src
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , parsec
+    , pretty
+    , directory
+    , process
+    , hos
+  default-language: Haskell2010
+
