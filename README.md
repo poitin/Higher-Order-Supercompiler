@@ -1,5 +1,5 @@
 # Higher-Order-Supercompiler
-An implementation of the higher-order supercompilation algorithm as described in the paper "On the Termination of Higher-Order Positive Supercompilation"
+An implementation of the higher-order supercompilation algorithm as described in the paper ["On the Termination of Higher-Order Positive Supercompilation"](https://www.google.ie/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&ved=2ahUKEwiug9Lk9qHzAhVEUMAKHU2lAvwQFnoECAMQAQ&url=https%3A%2F%2Feasychair.org%2Fpublications%2Fdownload%2FFJ&usg=AOvVaw2gvt1ee4yW-6p8I3PqEJFQ)
 
 The implementation can be built and executed using stack.
 
