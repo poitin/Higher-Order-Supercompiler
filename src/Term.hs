@@ -15,7 +15,6 @@ import qualified Text.ParserCombinators.Parsec.Token as T
 import Text.ParserCombinators.Parsec.Language
 import System.IO
 import System.Directory
-import Data.Bifunctor
 
 -- terms
 
@@ -70,6 +69,8 @@ place t (CaseCtx con bs) = place (Case t bs) con
 
 redex (Case t bs) = redex t 
 redex (Apply t u) = redex t
+redex (Unfold t u) = redex t
+redex (Fold t u) = redex t
 redex t = t
 
 
@@ -84,7 +85,7 @@ matchCase bs bs' = length bs == length bs' && all (\((c,xs,t),(c',xs',t')) -> c 
 
 renaming t u = renaming' [] t u []
 
-renaming' ls (Free x) (Free x') r = if   x `elem` map fst r
+renaming' ls (Free x) (Free x') r = if   x `elem` map fst r || x' `elem` map snd r
                                     then [r | (x,x') `elem` r]
                                     else [(x,x'):r] 
 renaming' ls (Bound i) (Bound i') r | i==i' = [r]
@@ -189,12 +190,12 @@ residualise' (Let x t u) fv d = let x' = renameVar fv x
                                     (t',d') = residualise' t fv d
                                     (u',d'') = residualise' (concrete x' u) (x':fv) d'
                                 in  (subst t' (abstract u' x'),d'')
-residualise' (Unfold t u) fv d = case [(f,xs,t',r) | (f,(xs,t',u')) <- d, r <- renaming t' (Unfold t u)] of
-                                    ((f,xs,t',r):_) -> (rename r (foldl (\t x -> Apply t (Free x)) (Fun f) xs),d)
-                                    [] -> let f = renameVar (fv ++ map fst d) "f"
-                                              xs = free u
-                                              t' = foldl (\t x -> Apply t (Free x)) (Fun f) xs
-                                              u' = renameFold t t' u
+residualise' (Unfold t u) fv d = let Fun f = redex t
+                                     xs = free u
+                                     t' = foldl (\t x -> Apply t (Free x)) (Fun f) xs
+                                 in  if   f `elem` map fst d
+                                     then (t',d)
+                                     else let u' = renameFold t t' u
                                               (u'',d') = residualise' u' (f:fv) d
                                           in  (t',(f,(xs,Unfold t u,foldl abstract u'' xs)):d')
 residualise' (Fold t u) fv d = residualise' t fv d
@@ -387,11 +388,6 @@ renameVar fv x = if   x `elem` fv
                  else x
 
 renameVars fv xs = take (length xs) (foldr (\x fv -> let x' = renameVar fv x in x':fv) fv xs)
-
-removeDups [] = []
-removeDups ((x,x'):r) = if x==x' then removeDups r else (x,x'):removeDups r
-
--- unfold function in term redex
 
 unfold (Apply t u) d = Apply (unfold t d) u
 unfold (Case t bs) d = Case (unfold t d) bs
