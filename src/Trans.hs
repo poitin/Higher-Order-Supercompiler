@@ -72,8 +72,8 @@ supCtx t (ApplyCtx k u) fv m s1 s2 d e = do
                                          u' <- sup u EmptyCtx fv m s1 s2 d e
                                          supCtx (Apply t u') k fv m s1 s2 d (unfolds u'++e)
 supCtx t (CaseCtx k bs) fv m s1 s2 d e = do
-                                             bs' <- supBranches bs k fv m s1 s2 d e
-                                             return (Case t bs')
+                                         bs' <- supBranches bs k fv m s1 s2 d e
+                                         return (Case t bs')
 
 supFold [] fv m s1 s2 d e = return []
 supFold ((x,t):s) fv m s1 s2 d e = do
