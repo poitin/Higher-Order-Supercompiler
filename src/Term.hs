@@ -99,7 +99,7 @@ embedding t u = couple t u []
 
 embed t u r = couple t u r ++ dive t u r 
 
-couple (Free x) (Free x') r = if   x `elem` map fst r || x' `elem` map snd r
+couple (Free x) (Free x') r = if   x `elem` map fst r 
                               then [r | (x,x') `elem` r] 
                               else [(x,x'):r]
 couple (Bound i) (Bound i') r | i == i' = [r]
