@@ -185,7 +185,7 @@ residualise' (Unfold t u v) fv d = let Fun f = redex t
                                             in  (t',(f,(xs,foldl abstract v'' xs)):d')
 residualise' (Fold t) fv d = residualise' t fv d
 
--- rename fold nodes in tree
+-- rename fold nodes in process tree
 
 renameFold f f' (Free x) = Free x
 renameFold f f' (Bound i) = Bound i
@@ -204,7 +204,7 @@ renameFold f f' (Fold t) = if   redex t == redex f
                                 in Fold (instantiate (zip xs ts) f')
                            else Fold t
 
--- simplify tree to remove unmatched unfolds
+-- simplify process tree to remove unmatched unfolds
 
 simplify (Free x) = Free x
 simplify (Bound i) = Bound i
@@ -239,7 +239,7 @@ eval (Fun f) k d r a = case lookup f d of
 eval (Case t bs) k d r a = eval t (CaseCtx k bs) d r a
 eval (Let x t u) k d r a = eval (subst t u) k d (r+1) a
 
--- free variables in a tre
+-- free variables in a process tree
 
 free t = nub (free' t)
 
@@ -254,7 +254,7 @@ free' (Let x t u) = free' t  ++ free' u
 free' (Unfold t u v) = free' v
 free' (Fold t) = free' t
 
--- folds in a tree
+-- folds in a process tree
 
 folds (Free x) = []
 folds (Bound i) = []
@@ -267,7 +267,7 @@ folds (Let x t u) = folds t  ++ folds u
 folds (Unfold t u v) = filter (/=redex t) (folds v)
 folds (Fold t) = redex t:folds t
 
--- unfolds in a tree
+-- unfolds in a process tree
 
 unfolds (Free x) = []
 unfolds (Bound i) = []

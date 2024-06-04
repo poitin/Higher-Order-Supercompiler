@@ -48,11 +48,6 @@ sup (Fun f) k fv m s1 s2 d e = let t = place (Fun f) k
                                in  case [rename r u | u@(Unfold _ t' _) <- e, r <- renaming t' t] of
                                       (u:_) -> return u
                                       [] -> fold t fv m s1 s2 d e
-sup (Let x t u) k fv m s1 s2 d e = let x' = renameVar fv x
-                                   in  do
-                                       t' <- sup t EmptyCtx fv m s1 s2 d e
-                                       u' <- sup (concrete x' u) k (x':fv) m s1 s2 d (unfolds t'++e)
-                                       return (Let x t' (abstract u' x'))
 
 supArgs [] fv m s1 s2 d e = return []
 supArgs (t:ts) fv m s1 s2 d e = do
@@ -75,24 +70,24 @@ supCtx t (CaseCtx k bs) fv m s1 s2 d e = do
                                          bs' <- supBranches bs k fv m s1 s2 d e
                                          return (Case t bs')
 
-supFold [] fv m s1 s2 d e = return []
-supFold ((x,t):s) fv m s1 s2 d e = do
-                                   t' <- sup t EmptyCtx fv m s1 s2 d e
-                                   s' <- supFold s fv m s1 s2 d (unfolds t'++e)
-                                   return ((x,t'):s')
+supLet [] u fv m s1 s2 d e = return u
+supLet ((x,t):s) u fv m s1 s2 d e = do
+                                    t' <- sup t EmptyCtx fv m s1 s2 d e
+                                    u' <- supLet s u (x:fv) m s1 s2 d (unfolds t'++e)
+                                    return (Let x t' (abstract u' x))
 
 fold t fv m s1 s2 d e = case [(u,t',r) | (u,t') <- m, r <- embedding t' t] of
                            ((u,t',r):_) -> let (u',s1',s2') = generalise t' t fv s1 s2
                                            in  case renaming t' u' of
                                                   [] -> throw (u,(u',s1',s2'))
-                                                  (r':_) -> do
-                                                           s <- supFold s2' fv m s1 s2 d e
-                                                           return (Fold (instantiate s (rename r (rename r' u))))
+                                                  (r':_) -> supLet s2' (Fold (rename r (rename r' u))) fv m s1 s2 d e
                            [] -> let f = renameVar (fv ++ [f | (Unfold t _ _) <- e, let Fun f = redex t]) "f"
                                      xs = free t
                                      u = foldl (\t x -> Apply t (Free x)) (Fun f) xs
                                      handler (u',(t',s1',s2')) = if   u==u'
-                                                                 then sup (makeLet s1' t') EmptyCtx (f:fv) m (s1++s1') (s2++s2') d e                                                               
+                                                                 then do
+                                                                      t'' <- sup t' EmptyCtx (fv++map fst s1') m s1 s2 d e
+                                                                      supLet s1' t'' (f:fv) m (s1++s1') (s2++s2') d (unfolds t''++e)                                                           
                                                                  else throw (u',(t',s1',s2'))
                                    in  do
                                        t' <- handle (sup (unfold t d) EmptyCtx (f:fv) ((u,t):m) s1 s2 d e) handler
