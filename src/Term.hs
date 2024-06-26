@@ -122,31 +122,31 @@ dive t t' r = []
 
 generalise t u fv s1 s2 | not (null (couple t u [])) = generalise' t u fv s1 s2
 generalise t u fv s1 s2 = case [x | ((x,t'),(_,u')) <- zip s1 s2, t==t' && u==u'] of
-                             (x:_) -> (Free x,[],[])
+                             (x:_) -> (Free x,s1,s2)
                              [] -> let x = renameVar (fv++map fst s1) "x"
-                                   in  (Free x,[(x,t)],[(x,u)])
+                                   in  (Free x,(x,t):s1,(x,u):s2)
 
-generalise' (Free x) (Free x') fv s1 s2 = (Free x,[],[])
-generalise' (Bound i) (Bound i') fv s1 s2 = (Bound i,[],[])
+generalise' (Free x) (Free x') fv s1 s2 = (Free x,s1,s2)
+generalise' (Bound i) (Bound i') fv s1 s2 = (Bound i,s1,s2)
 generalise' (Lambda x t) (Lambda x' t') fv s1 s2 = let x'' = renameVar (fv++map fst s1) x
                                                        (t'',s1',s2') = generalise (concrete x'' t) (concrete x'' t') (x'':fv) s1 s2
                                                    in  (Lambda x (abstract t'' x''),s1',s2')
-generalise' (Con c ts) (Con c' ts') fv s1 s2 = let ((s1',s2'),ts'') = mapAccumL (\(s1',s2') (t,t') -> let (t'',s1'',s2'') = generalise t t' fv (s1++s1') (s2++s2')
-                                                                                                      in  ((s1'++s1'',s2'++s2''),t'')) ([],[]) (zip ts ts')
+generalise' (Con c ts) (Con c' ts') fv s1 s2 = let ((s1',s2'),ts'') = mapAccumL (\(s1,s2) (t,t') -> let (t'',s1',s2') = generalise t t' fv s1 s2
+                                                                                                    in  ((s1',s2'),t'')) (s1,s2) (zip ts ts')
                                                in  (Con c ts'',s1',s2')
 generalise' (Apply t u) (Apply t' u') fv s1 s2 = let (t'',s1',s2') = generalise t t' fv s1 s2
-                                                     (u'',s1'',s2'') = generalise u u' fv (s1++s1') (s2++s2')      
-                                                 in  (Apply t'' u'',s1'++s1'',s2'++s2'')
-generalise' (Fun f) (Fun f') fv s1 s2 = (Fun f,[],[])
+                                                     (u'',s1'',s2'') = generalise u u' fv s1' s2'    
+                                                 in  (Apply t'' u'',s1'',s2'')
+generalise' (Fun f) (Fun f') fv s1 s2 = (Fun f,s1,s2)
 generalise' (Case t bs) (Case t' bs') fv s1 s2 = let (t'',s1',s2') = generalise t t' fv s1 s2
-                                                     ((s1'',s2''),bs'') = mapAccumL (\(s1',s2') ((c,xs,t),(c',xs',t')) -> let xs'' = renameVars (fv++map fst s1++map fst s1') xs
-                                                                                                                              (t'',s1'',s2'') = generalise (foldr concrete t xs'') (foldr concrete t' xs'') (xs''++fv) (s1++s1') (s2++s2')
-                                                                                                                          in  ((s1'++s1'',s2'++s2''),(c,xs,foldl abstract t'' xs''))) (s1',s2') (zip bs bs')
+                                                     ((s1'',s2''),bs'') = mapAccumL (\(s1,s2) ((c,xs,t),(c',xs',t')) -> let xs'' = renameVars (fv++map fst s1) xs
+                                                                                                                            (t'',s1',s2') = generalise (foldr concrete t xs'') (foldr concrete t' xs'') (xs''++fv) s1 s2
+                                                                                                                        in  ((s1',s2'),(c,xs,foldl abstract t'' xs''))) (s1',s2') (zip bs bs')
                                                  in  (Case t'' bs'',s1'',s2'')
 generalise' (Let x t u) (Let x' t' u') fv s1 s2 = let x'' = renameVar (fv++map fst s1) x
                                                       (t'',s1',s2') =  generalise t t' fv s1 s2
-                                                      (u'',s1'',s2'') = generalise (concrete x'' u) (concrete x'' u') (x'':fv) (s1++s1') (s2++s2')
-                                                  in  (Let x t'' (abstract u'' x''),s1'++s1'',s2'++s2'')
+                                                      (u'',s1'',s2'') = generalise (concrete x'' u) (concrete x'' u') (x'':fv) s1' s2'
+                                                  in  (Let x t'' (abstract u'' x''),s1'',s2'')
 
 makeLet s t = foldl (\u (x,t) -> Let x t (abstract u x)) t s
 
@@ -176,33 +176,12 @@ residualise' (Let x t u) fv d = let x' = renameVar fv x
                                     (u',d'') = residualise' (concrete x' u) (x':fv) d'
                                 in  (subst t' (abstract u' x'),d'')
 residualise' (Unfold t u v) fv d = let Fun f = redex t
-                                       xs = free v
-                                       t' = foldl (\t x -> Apply t (Free x)) (Fun f) xs
+                                       xs = free t
                                    in  if   f `elem` map fst d
-                                       then (t',d)
-                                       else let v' = renameFold t t' v
-                                                (v'',d') = residualise' v' (f:fv) d
-                                            in  (t',(f,(xs,foldl abstract v'' xs)):d')
+                                       then (t,d)
+                                       else let (v',d') = residualise' v (f:fv) d
+                                            in  (t,(f,(xs,foldl abstract v' xs)):d')
 residualise' (Fold t) fv d = residualise' t fv d
-
--- rename fold nodes in process tree
-
-renameFold f f' (Free x) = Free x
-renameFold f f' (Bound i) = Bound i
-renameFold f f' (Lambda x t) = Lambda x (renameFold f f' t)
-renameFold f f' (Con c ts) = Con c (map (renameFold f f') ts)
-renameFold f f' (Apply t u) = Apply (renameFold f f' t) (renameFold f f' u)
-renameFold f f' (Fun f'') = Fun f''
-renameFold f f' (Case t bs) = Case (renameFold f f' t) (map (\(c,xs,t) -> (c,xs,renameFold f f' t)) bs)
-renameFold f f' (Let x t u) = Let x (renameFold f f' t) (renameFold f f' u)
-renameFold f f' (Unfold t u v) = if   redex t == redex f
-                                 then Unfold t u v
-                                 else Unfold t u (renameFold f f' v)
-renameFold f f' (Fold t) = if   redex t == redex f
-                           then let xs = free f
-                                    ts = args t
-                                in Fold (instantiate (zip xs ts) f')
-                           else Fold t
 
 -- simplify process tree to remove unmatched unfolds
 
