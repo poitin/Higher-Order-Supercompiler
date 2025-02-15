@@ -1,3 +1,0 @@
-import NatList
-
-main = nrev xs

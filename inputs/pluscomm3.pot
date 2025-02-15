@@ -1,5 +1,0 @@
-import Nat
-
-main = eqNat (plus x Succ(Succ(y))) (plus y Succ(Succ(x)))
-
-

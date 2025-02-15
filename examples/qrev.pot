@@ -1,4 +1,0 @@
-import NatList
-
-main = qrev xs []
-
