@@ -1,0 +1,15 @@
+import NatList
+
+main = zipWith (\f -> \x -> f x) (concat (repeat [(\x -> case x of A -> B), (\x -> case x of C -> D)])) (concat (repeat [A, C, A, C, A, C, A, C, A, C, A, C, A, C, A, C]));
+
+concat ls = case ls of
+              Cons(h, t) -> append h (concat t)
+            | Nil -> Nil;
+
+repeat a = Cons(a, repeat(a));
+
+zipWith f xs ys = case xs of
+                    Cons(hx, tx) -> (case ys of
+                                      Cons(hy, ty) -> Cons((f hx hy), (zipWith f tx ty))
+                                    | Nil -> Nil)
+                  | Nil -> Nil

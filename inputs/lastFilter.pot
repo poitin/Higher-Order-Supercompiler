@@ -1,0 +1,18 @@
+main = last (filter ff ls);
+
+last ls =
+  case ls of
+    Cons(h, t) -> Some(go h t)
+    | Nil -> None;
+
+go a ls =
+  case ls of
+    Cons(h, t) -> go h t
+    | Nil -> a;
+
+filter ff ls =
+  case ls of
+    Cons(h, t) -> (case (ff h) of
+                    True -> Cons(h, (filter ff t))
+                    | False -> filter ff t)
+    | Nil -> Nil

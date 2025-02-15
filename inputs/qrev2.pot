@@ -1,0 +1,8 @@
+import NatList
+
+main = f xs (\x->x);
+f xs g = case xs of
+            Nil -> g Nil
+		  | Cons(x,xs) -> f xs (\y -> Cons(x,g y))
+		  
+

@@ -1,0 +1,12 @@
+import Nat
+
+main = take n (repeat x);
+
+repeat x = Cons(x, (repeat x));
+
+take n ls = case n of
+            Zero -> Nil
+            | Succ(n) -> (
+              case ls of
+                Nil -> Nil
+                | Cons(h, t) -> Cons(h, (take (minus n Succ(Zero)) t)))

@@ -1,0 +1,39 @@
+main = decideHe s t;
+
+decideHe s t = case s of
+    Call(h, args) -> (case t of
+        Call(h', args') -> (case dive s args' of
+            T -> T
+          | F -> (case equalSymbols h h' of
+                T -> couple args args'
+              | F -> F)));
+
+dive s args' = case args' of
+    Nil -> F
+  | Cons(t, ts) -> (case decideHe s t of
+        T -> T
+      | F -> dive s ts);
+
+couple args args' = case args of
+    Nil -> (case args' of
+        Nil -> T
+      | Cons(t, ts) -> F)
+  | Cons(s, ss) -> (case args' of
+        Nil -> F
+      | Cons(t, ts) -> case decideHe s t of
+            T -> couple ss ts
+          | F -> F);
+
+equalSymbols h h' = case h of
+    A -> (case h' of
+        A -> T
+      | B -> F
+      | C -> F)
+  | B -> (case h' of
+        A -> F
+      | B -> T
+      | C -> F)
+  | C -> (case h' of
+        A -> F
+      | B -> F
+      | C -> T)

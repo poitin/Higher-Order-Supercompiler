@@ -1,0 +1,9 @@
+import Nat
+
+main = f1 x y (\x->x);
+f1 x y f = case x of
+              Zero -> f2 y f
+            | Succ(x) -> f1 x y (\x->Succ(f x));
+f2 y f = case y of
+            Zero -> Zero
+          | Succ(y) -> f (f2 y f)

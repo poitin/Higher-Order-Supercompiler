@@ -1,0 +1,4 @@
+import NatList
+
+main = append (append xs ys) zs
+

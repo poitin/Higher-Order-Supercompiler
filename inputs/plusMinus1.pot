@@ -1,0 +1,3 @@
+import Nat
+
+main = minus (plus n m) m

@@ -1,0 +1,11 @@
+import NatList
+
+main = case (unzip xs) of P(as, bs) -> zip as bs;
+
+zip xs ys = case xs of
+  Nil -> []
+  | Cons(hx,tx) -> (case ys of Nil -> [] | Cons(hy,ty) -> Cons(P(hx,hy), zip tx ty));
+
+unzip xs = case xs of
+  Nil -> P([], [])
+  | Cons(hx, tx) -> (case hx of P(a,b) -> (case (unzip tx) of P(as, bs) -> P(Cons(a,as), Cons(b,bs))))

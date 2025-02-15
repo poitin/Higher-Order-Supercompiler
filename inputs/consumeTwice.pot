@@ -1,0 +1,7 @@
+import NatList
+
+main = plus (sum xs) (length xs);
+
+sum xs = case xs of
+  Nil -> 0
+  | Cons(h, t) -> plus h (sum t)

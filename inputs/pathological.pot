@@ -1,0 +1,7 @@
+import Nat
+
+main = f x x;
+
+f x y = case x of
+           Zero -> f y y
+	     | Succ(x') -> f x' y

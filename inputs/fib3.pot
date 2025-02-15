@@ -1,0 +1,11 @@
+main = f n;
+f n = case n of
+         Zero -> 1
+       | Succ(n) -> case n of
+                        Zero -> 1
+                      | Succ(n1) -> case (f n1) of
+                                       Zero -> f Succ(n1)
+                                     | Succ(m) -> Succ(f1 m n1);
+f1 m x2 = case m of
+             Zero -> f Succ(x2)
+           | Succ(m1) -> Succ(f1 m1 x2)

@@ -1,0 +1,10 @@
+main = c (prodOne n) (prodTwo n);
+
+prodOne x = Cons(x, Cons(x, Cons(x, prodOne x)));
+prodTwo x = Cons(x, Cons(x, Cons(x, prodTwo x)));
+
+c x y =
+  case x of
+    Cons(e, a) -> case a of
+      Cons(e, a) -> case y of
+        Cons(e, b) -> c a b

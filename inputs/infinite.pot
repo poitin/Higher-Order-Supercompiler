@@ -1,0 +1,8 @@
+main = c (prod n);
+
+prod x = Cons(x, Cons(x, Cons(x, prod x)));
+
+c x =
+  case x of
+    Cons(e, a) -> case a of
+      Cons(e, a) -> c a

@@ -1,0 +1,11 @@
+import NatList
+
+main = sum 0 (flatMap (\x -> [x, x]) ls);
+
+flatMap f ls = case ls of
+                  Nil -> Nil
+                | Cons(h, t) -> append (f h) (flatMap f t);
+
+sum s ls = case ls of
+              Nil -> s
+            | Cons(h, t) -> sum (plus s h) t
