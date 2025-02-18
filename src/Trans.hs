@@ -70,9 +70,9 @@ supCtx t (CaseCtx k bs) fv m d e = do
 
 supLet [] t fv m d e = return t
 supLet ((x,t):s') u fv m d e = do
-                                 t'' <- sup t EmptyCtx fv m d e
-                                 u' <- supLet s' u (x:fv) m d (unfolds t''++e)
-                                 return (Let x t'' (abstract u' x))
+                               t'' <- sup t EmptyCtx fv m d e
+                               u' <- supLet s' u (x:fv) m d (unfolds t''++e)
+                               return (Let x t'' (abstract u' x))
 
 fold t fv m d e = case [(u,t') | (u,t') <- m, couple t' t] of
                      ((u,t'):_) -> let (u',s1,s2) = generalise t' t fv [] []

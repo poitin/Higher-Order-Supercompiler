@@ -133,12 +133,6 @@ generalise t u fv s1 s2 = case [x | (x,t') <- s1, (x',u') <- s2, x==x' && t==t' 
                              [] -> let x = renameVar (fv++map fst s1) "x"
                                    in  (Free x,(x,t):s1,(x,u):s2)
 
-minimise (t,s) = minimise' s t []
-
-minimise' [] t s = (t,s)
-minimise' ((x,Free x'):s') t s | x' `notElem` free t = minimise' s' (rename [(x,x')] t) s
-minimise' ((x,t'):s') t s = minimise' s' t ((x,t'):s)
-
 -- program residualisation
 
 residualise t = residualise' (simplify t) (free t) []
