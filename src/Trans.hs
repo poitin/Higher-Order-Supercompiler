@@ -77,10 +77,8 @@ supLet ((x,t):s') u fv m d e = do
 fold t fv m d e = case [(u,t') | (u,t') <- m, couple t' t] of
                      ((u,t'):_) -> let (u',s1,s2) = generalise t' t fv [] []
                                    in  case renaming t' u' of
-                                          Nothing -> let (t'',s1') = minimise (u',s1)
-                                                     in  throw (u,(t'',s1'))
-                                          Just r -> let (t'',s2') = minimise (rename r u,s2)
-                                                    in  supLet s2' (Fold t'') fv m d e
+                                          Nothing -> throw (u,(u',s1))
+                                          Just r -> supLet s2 (Fold (rename r u)) fv m d e
                      [] -> let f = renameVar (fv ++ [f | (Unfold t _ _) <- e, let Fun f = redex t]) "f"
                                xs = free t
                                u = foldl (\t x -> Apply t (Free x)) (Fun f) xs
