@@ -113,9 +113,9 @@ dive t t' = False
 -- generalisation of terms
 
 generalise (Free x) (Free x') fv s1 s2 | x==x' = (Free x,s1,s2)
-generalise (Lambda x t) (Lambda x' t') fv s1 s2 = let x'' = renameVar (fv++map fst s1) x
-                                                      (t'',s1',s2') = generalise (concrete x'' t) (concrete x'' t') (x'':fv) s1 s2
-                                                  in  (Lambda x (abstract t'' x''),s1',s2')
+generalise u@(Lambda x t) u'@(Lambda x' t') fv s1 s2 | couple u u' = let x'' = renameVar (fv++map fst s1) x
+                                                                         (t'',s1',s2') = generalise (concrete x'' t) (concrete x'' t') (x'':fv) s1 s2
+                                                                     in  (Lambda x (abstract t'' x''),s1',s2')
 generalise (Con c ts) (Con c' ts') fv s1 s2 | c==c' = let ((s1',s2'),ts'') = mapAccumL (\(s1,s2) (t,t') -> let (t'',s1',s2') = generalise t t' fv s1 s2
                                                                                                            in  ((s1',s2'),t'')) (s1,s2) (zip ts ts')
                                                       in  (Con c ts'',s1',s2')

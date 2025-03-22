@@ -8,7 +8,7 @@ import Prelude hiding ((<>))
 import Data.Maybe
 import Data.List
 import Data.Tuple
-             
+
 -- supercompiler
 
 super (t,d) = let t' = returnval (sup t EmptyCtx (free t) [] d [])
